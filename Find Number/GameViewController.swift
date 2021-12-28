@@ -10,20 +10,21 @@ final class GameViewController: UIViewController {
     @IBOutlet weak var nextDigit: UILabel!
     @IBOutlet weak var newGameButton: UIButton!
     
-    lazy var game = Game(countItems: buttons.count, time: 30) { [weak self](status, time) in
+    lazy var game = Game(countItems: buttons.count) { [weak self](status, time) in
         guard let self = self else {return}
         self.timerLabel.text = time.secondsToString()
         self.updateInfoGame(with: status)
     }
-    
-    
-    
-    
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScreen()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        game.stopGame()
     }
 
 }
@@ -46,15 +47,14 @@ extension GameViewController {
         
         for index in game.items.indices {
             buttons[index].setTitle(game.items[index].title, for: .normal)
-//            buttons[index].isHidden = false
             buttons[index].alpha = 1
             buttons[index].isEnabled = true
         }
         nextDigit.text = game.nextItem?.title
     }
+    
     func updateUI() {
         for index in game.items.indices {
-//            buttons[index].isHidden = game.items[index].isFound
             buttons[index].alpha = game.items[index].isFound ? 0 : 1
             buttons[index].isEnabled = !game.items[index].isFound
             
@@ -79,8 +79,8 @@ extension GameViewController {
             statusLabel.textColor = .black
             newGameButton.isHidden = true
         case .win:
-            statusLabel.text = "Вы проиграли"
-            statusLabel.textColor = .red
+            statusLabel.text = "Вы выиграли"
+            statusLabel.textColor = .green
             newGameButton.isHidden = false
         case .lose:
             statusLabel.text = "Вы проиграли"
@@ -90,14 +90,6 @@ extension GameViewController {
     }
 }
 
-extension Int {
-    func secondsToString() -> String {
-        let minutes = self / 60
-        let seconds = self % 60
-        
-        return String(format: "%d:%02d", minutes, seconds)
-    }
-}
 
 // MARK: - Outlets
 // MARK: - Actions

@@ -7,18 +7,18 @@ enum StatusGame {
 }
 
 final class Game {
-  
-    struct Item { // отвечает за кнопки в игре
+    
+    struct Item {
         var title: String
         var isFound = false
         var isError = false
     }
     
-    private let data = Array (1...99) // массив цифр, из которого мы будем выбирать нужное количество и отображать на кнопках во время игры
+    private let data = Array (1...99)
     
-    var items: [Item] = [] // массив с айтемами
+    var items: [Item] = []
     
-    private var countItems: Int //кол-во айтемов в нашем массие items
+    private var countItems: Int
     
     var nextItem: Item?
     
@@ -43,10 +43,10 @@ final class Game {
     private var timer: Timer?
     private var updateTimer: ((StatusGame, Int) -> Void)
     
-    init(countItems: Int, time: Int, updateTimer: @escaping (_ status: StatusGame, _ seconds: Int) -> Void) {
+    init(countItems: Int, updateTimer: @escaping (_ status: StatusGame, _ seconds: Int) -> Void) {
         self.countItems = countItems
-        self.timeForGame = time
-        self.secondsGame = time
+        self.timeForGame = Settings.shared.currentSettings.timeForGame
+        self.secondsGame = self.timeForGame
         self.updateTimer = updateTimer
         setupGame()
     }
@@ -65,9 +65,12 @@ extension Game {
         
         nextItem = items.shuffled().first
         updateTimer(status, secondsGame)
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self](_) in
-            self?.secondsGame -= 1
-        })
+        
+        if Settings.shared.currentSettings.timerState{
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self](_) in
+                self?.secondsGame -= 1
+            })
+        }
     }
     
     func newGame(){
@@ -94,5 +97,14 @@ extension Game {
     
     func stopGame() {
         timer?.invalidate()
+    }
+}
+
+extension Int {
+    func secondsToString() -> String {
+        let minutes = self / 60
+        let seconds = self % 60
+        
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }
